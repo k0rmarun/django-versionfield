@@ -6,6 +6,7 @@ from django.test import TestCase
 from django.db import models
 from django.forms import ValidationError
 
+from versionfield.utils import convert_version_string_to_int
 from . import VersionField
 from .constants import DEFAULT_NUMBER_BITS
 from .version import Version
@@ -99,6 +100,19 @@ class VersionFieldTest(TestCase):
         self.assertTrue(error_occured)
         self.assertTrue(correct_error)
 
+    def test_to_python_none(self):
+        field = forms.VersionField()
+        self.assertIsNone(field.to_python(None))
+
+    def test_to_python_str(self):
+        field = forms.VersionField()
+        self.assertEqual(Version("1.2.3", DEFAULT_NUMBER_BITS), field.to_python("1.2.3"))
+
+    def test_to_python_numeric(self):
+        field = forms.VersionField()
+        self.assertEqual(Version("1.2.3", DEFAULT_NUMBER_BITS),
+                         field.to_python(convert_version_string_to_int("1.2.3", DEFAULT_NUMBER_BITS)))
+
 
 class DummyModelCustomBit(models.Model):
     version = VersionField(number_bits=(8, 16, 8))
@@ -120,6 +134,14 @@ class VersionObjectTestCase(unittest.TestCase):
             Version("1.2.3", DEFAULT_NUMBER_BITS),
             Version("1.2.3", DEFAULT_NUMBER_BITS),
         )
+        self.assertEqual(
+            Version("1.2.3", DEFAULT_NUMBER_BITS),
+            "1.2.3"
+        )
+        self.assertNotEqual(
+            Version("1.2.3", DEFAULT_NUMBER_BITS),
+            None
+        )
 
     def test_lt_operator(self):
         self.assertTrue(
@@ -129,6 +151,18 @@ class VersionObjectTestCase(unittest.TestCase):
         self.assertFalse(
             Version("1.2.4", DEFAULT_NUMBER_BITS) <
             Version("1.2.3", DEFAULT_NUMBER_BITS)
+        )
+        self.assertTrue(
+            Version("1.2.3", DEFAULT_NUMBER_BITS) <
+            "1.2.4"
+        )
+        self.assertFalse(
+            Version("1.2.4", DEFAULT_NUMBER_BITS) <
+            "1.2.3"
+        )
+        self.assertFalse(
+            Version("1.2.4", DEFAULT_NUMBER_BITS) <
+            None
         )
 
     def test_le_operator(self):
@@ -140,6 +174,18 @@ class VersionObjectTestCase(unittest.TestCase):
             Version("1.2.4", DEFAULT_NUMBER_BITS) <=
             Version("1.2.4", DEFAULT_NUMBER_BITS)
         )
+        self.assertTrue(
+            Version("1.2.3", DEFAULT_NUMBER_BITS) <=
+            "1.2.4"
+        )
+        self.assertTrue(
+            Version("1.2.4", DEFAULT_NUMBER_BITS) <=
+            "1.2.4"
+        )
+        self.assertFalse(
+            Version("1.2.4", DEFAULT_NUMBER_BITS) <=
+            None
+        )
 
     def test_gt_operator(self):
         self.assertTrue(
@@ -150,6 +196,18 @@ class VersionObjectTestCase(unittest.TestCase):
             Version("2.3.4", DEFAULT_NUMBER_BITS) >
             Version("3.2.1", DEFAULT_NUMBER_BITS)
         )
+        self.assertTrue(
+            Version("1.2.4", DEFAULT_NUMBER_BITS) >
+            "1.2.3"
+        )
+        self.assertFalse(
+            Version("2.3.4", DEFAULT_NUMBER_BITS) >
+            "3.2.1"
+        )
+        self.assertFalse(
+            Version("2.3.4", DEFAULT_NUMBER_BITS) >
+            None
+        )
 
     def test_ge_operator(self):
         self.assertTrue(
@@ -157,6 +215,20 @@ class VersionObjectTestCase(unittest.TestCase):
             Version("1.2.3", DEFAULT_NUMBER_BITS)
         )
         self.assertTrue(
-            Version("3.3.3", DEFAULT_NUMBER_BITS) <=
-            Version("3.3.3", DEFAULT_NUMBER_BITS)
+            Version("3.3.3", DEFAULT_NUMBER_BITS) >=
+            "3.3.3"
+        )
+        self.assertFalse(
+            Version("3.3.3", DEFAULT_NUMBER_BITS) >=
+            None
+        )
+
+    def test_str(self):
+        self.assertEqual(
+            "1.2.3",
+            str(Version("1.2.3", DEFAULT_NUMBER_BITS))
+        )
+        self.assertEqual(
+            "1.2.3",
+            Version("1.2.3", DEFAULT_NUMBER_BITS).__repr__()
         )

@@ -10,20 +10,19 @@ except ImportError:
 
 setup(
     name="django-versionfield2",
-    version="0.5.0",
-    url='https://github.com/tonioo/django-versionfield',
+    version="0.6.0",
+    url='https://github.com/kormarun/django-versionfield',
     license='BSD',
     description="A DB Independent Custom Django Field for storing Version numbers for fast indexing",
-    author='Antoine Nguyen',
-    author_email='tonio@ngyn.org',
+    author='Kormarun',
+    author_email='kormarun@gmail.com',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'Django<=1.10.99',
-        'six>=1.9.0',
+        'Django>=3.0',
     ],
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 2 - Beta',
         'Framework :: Django',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',

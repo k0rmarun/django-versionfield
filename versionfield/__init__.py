@@ -1,9 +1,6 @@
 from __future__ import unicode_literals
 
-import six
-
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 
 from . import forms
 from .constants import DEFAULT_NUMBER_BITS
@@ -11,7 +8,6 @@ from .version import Version
 from .utils import convert_version_int_to_string
 
 
-@python_2_unicode_compatible
 class VersionField(models.Field):
 
     """
@@ -36,24 +32,19 @@ class VersionField(models.Field):
         if isinstance(value, Version):
             return value
 
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             return Version(value, self.number_bits)
 
-        return Version(
-            convert_version_int_to_string(value, self.number_bits),
-            self.number_bits
-        )
+        return Version(convert_version_int_to_string(value, self.number_bits), self.number_bits)
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection):
         """Convert data from database."""
         if value is None:
             return value
-        return Version(
-            convert_version_int_to_string(value, self.number_bits),
-            self.number_bits)
+        return Version(convert_version_int_to_string(value, self.number_bits), self.number_bits)
 
     def get_prep_value(self, value):
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             return int(Version(value, self.number_bits))
 
         if value is None:
@@ -70,7 +61,7 @@ class VersionField(models.Field):
         return super(VersionField, self).formfield(**defaults)
 
     def __str__(self, value):
-        return six.text_type(value)
+        return str(value)
 
 
 try:
